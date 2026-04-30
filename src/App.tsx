@@ -3,8 +3,15 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { LanguageProvider } from "@/context/LanguageContext";
+import Splash from "./pages/Splash";
+import LanguageSelect from "./pages/LanguageSelect";
+import Menu from "./pages/Menu";
+import Scanner from "./pages/Scanner";
+import Chatbot from "./pages/Chatbot";
+import LightSensor from "./pages/LightSensor";
+import Weather from "./pages/Weather";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -13,13 +20,20 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Splash />} />
+            <Route path="/language" element={<LanguageSelect />} />
+            <Route path="/menu" element={<Menu />} />
+            <Route path="/scanner" element={<Scanner />} />
+            <Route path="/chatbot" element={<Chatbot />} />
+            <Route path="/light" element={<LightSensor />} />
+            <Route path="/weather" element={<Weather />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -1,0 +1,143 @@
+import { createContext, useContext, useState, ReactNode } from "react";
+
+export type Lang = "en" | "ms" | "zh" | "ta";
+
+type Dict = Record<string, string>;
+
+const translations: Record<Lang, Dict> = {
+  en: {
+    appName: "AgroPulse",
+    loading: "Loading...",
+    chooseLang: "Choose your language",
+    scanner: "PLANT DISEASE SCANNER",
+    chatbot: "AI CHATBOT",
+    light: "LIGHT VALUE",
+    weather: "WEATHER FORECAST",
+    back: "BACK",
+    exit: "EXIT",
+    diseasePredicted: "Disease Predicted",
+    predict: "Predict",
+    scanPlant: "Scan Plant",
+    feedback: "Your Feedback",
+    submit: "Submit",
+    joinTg: "Join Telegram Group",
+    askAnything: "ASK ME ANYTHING....",
+    search: "SEARCH",
+    stop: "STOP",
+    typeMessage: "Type your question...",
+    lightValue: "Light value",
+    getData: "Get Data",
+    date: "Date",
+    time: "Time",
+    wind: "Wind",
+    rain: "Rain",
+    temp: "Temperature",
+    humidity: "Humidity",
+    menuTitle: "What would you like to do?",
+  },
+  ms: {
+    appName: "AgroPulse",
+    loading: "Memuatkan...",
+    chooseLang: "Pilih bahasa anda",
+    scanner: "PENGIMBAS PENYAKIT TUMBUHAN",
+    chatbot: "CHATBOT AI",
+    light: "NILAI CAHAYA",
+    weather: "RAMALAN CUACA",
+    back: "KEMBALI",
+    exit: "KELUAR",
+    diseasePredicted: "Penyakit Diramalkan",
+    predict: "Ramal",
+    scanPlant: "Imbas Tumbuhan",
+    feedback: "Maklum Balas Anda",
+    submit: "Hantar",
+    joinTg: "Sertai Kumpulan Telegram",
+    askAnything: "TANYA APA SAHAJA....",
+    search: "CARI",
+    stop: "BERHENTI",
+    typeMessage: "Taip soalan anda...",
+    lightValue: "Nilai cahaya",
+    getData: "Dapatkan Data",
+    date: "Tarikh",
+    time: "Masa",
+    wind: "Angin",
+    rain: "Hujan",
+    temp: "Suhu",
+    humidity: "Kelembapan",
+    menuTitle: "Apa yang anda mahu lakukan?",
+  },
+  zh: {
+    appName: "AgroPulse",
+    loading: "加载中...",
+    chooseLang: "选择您的语言",
+    scanner: "植物病害扫描器",
+    chatbot: "AI 聊天机器人",
+    light: "光线值",
+    weather: "天气预报",
+    back: "返回",
+    exit: "退出",
+    diseasePredicted: "病害预测",
+    predict: "预测",
+    scanPlant: "扫描植物",
+    feedback: "您的反馈",
+    submit: "提交",
+    joinTg: "加入电报群",
+    askAnything: "问我任何问题....",
+    search: "搜索",
+    stop: "停止",
+    typeMessage: "输入您的问题...",
+    lightValue: "光线值",
+    getData: "获取数据",
+    date: "日期",
+    time: "时间",
+    wind: "风",
+    rain: "雨",
+    temp: "温度",
+    humidity: "湿度",
+    menuTitle: "您想做什么？",
+  },
+  ta: {
+    appName: "AgroPulse",
+    loading: "ஏற்றுகிறது...",
+    chooseLang: "உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்",
+    scanner: "தாவர நோய் ஸ்கேனர்",
+    chatbot: "AI அரட்டை",
+    light: "ஒளி மதிப்பு",
+    weather: "வானிலை முன்னறிவிப்பு",
+    back: "பின்",
+    exit: "வெளியேறு",
+    diseasePredicted: "கணிக்கப்பட்ட நோய்",
+    predict: "கணி",
+    scanPlant: "தாவரத்தை ஸ்கேன்",
+    feedback: "உங்கள் கருத்து",
+    submit: "சமர்ப்பி",
+    joinTg: "டெலிகிராம் குழுவில் சேர",
+    askAnything: "எதையும் கேளுங்கள்....",
+    search: "தேடு",
+    stop: "நிறுத்து",
+    typeMessage: "உங்கள் கேள்வியை தட்டச்சு செய்க...",
+    lightValue: "ஒளி மதிப்பு",
+    getData: "தரவு பெறு",
+    date: "தேதி",
+    time: "நேரம்",
+    wind: "காற்று",
+    rain: "மழை",
+    temp: "வெப்பநிலை",
+    humidity: "ஈரப்பதம்",
+    menuTitle: "நீங்கள் என்ன செய்ய விரும்புகிறீர்கள்?",
+  },
+};
+
+type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: keyof typeof translations.en) => string };
+const LangContext = createContext<Ctx | null>(null);
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [lang, setLang] = useState<Lang>("en");
+  const t = (k: keyof typeof translations.en) => translations[lang][k] ?? translations.en[k];
+  return <LangContext.Provider value={{ lang, setLang, t }}>{children}</LangContext.Provider>;
+};
+
+export const useLang = () => {
+  const ctx = useContext(LangContext);
+  if (!ctx) throw new Error("useLang must be used inside LanguageProvider");
+  return ctx;
+};
