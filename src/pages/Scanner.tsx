@@ -22,6 +22,7 @@ const Scanner = () => {
   const [topLabel, setTopLabel] = useState<string>("");
   const [advice, setAdvice] = useState<DiseaseAdvice | null>(null);
   const [showAdvice, setShowAdvice] = useState(false);
+  const [adviceTab, setAdviceTab] = useState<"cure" | "cause" | "prevention">("cure");
   const [feedback, setFeedback] = useState("");
 
   const loadModel = async () => {
@@ -97,8 +98,15 @@ const Scanner = () => {
       return;
     }
     setAdvice(a);
+    setAdviceTab("cure");
     setShowAdvice(true);
   };
+
+  const tabConfig = {
+    cure: { title: "How to Cure", icon: Stethoscope, items: advice?.cure ?? [] },
+    cause: { title: "Cause", icon: Leaf, items: advice?.cause ?? [] },
+    prevention: { title: "Prevention", icon: ShieldCheck, items: advice?.prevention ?? [] },
+  } as const;
 
   const submitFeedback = () => {
     if (!feedback.trim()) return toast.error("Please write feedback first");
@@ -164,35 +172,51 @@ const Scanner = () => {
         <div className="bg-card rounded-2xl p-4 shadow-sm space-y-4">
           <p className="text-lg font-extrabold text-primary">{topLabel}</p>
 
-          <section>
-            <div className="flex items-center gap-2 mb-2">
-              <Leaf className="h-5 w-5 text-primary" />
-              <h2 className="font-bold">Cause</h2>
+          {/* Top toggle buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              onClick={() => setAdviceTab("cause")}
+              variant={adviceTab === "cause" ? "default" : "outline"}
+              className="h-12 rounded-xl font-bold gap-2"
+            >
+              <Leaf className="h-4 w-4" /> Cause
+            </Button>
+            <Button
+              onClick={() => setAdviceTab("prevention")}
+              variant={adviceTab === "prevention" ? "default" : "outline"}
+              className="h-12 rounded-xl font-bold gap-2"
+            >
+              <ShieldCheck className="h-4 w-4" /> Prevention
+            </Button>
+          </div>
+
+          {/* Active section */}
+          <section className="bg-muted/40 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              {(() => {
+                const Icon = tabConfig[adviceTab].icon;
+                return <Icon className="h-6 w-6 text-primary" />;
+              })()}
+              <h2 className="font-extrabold text-lg text-primary">
+                {tabConfig[adviceTab].title}
+              </h2>
             </div>
-            <ul className="list-disc pl-6 space-y-1 text-sm">
-              {advice.cause.map((c, i) => <li key={i}>{c}</li>)}
+            <ul className="list-disc pl-6 space-y-2 text-base">
+              {tabConfig[adviceTab].items.map((c, i) => (
+                <li key={i}>{c}</li>
+              ))}
             </ul>
           </section>
 
-          <section>
-            <div className="flex items-center gap-2 mb-2">
-              <Stethoscope className="h-5 w-5 text-primary" />
-              <h2 className="font-bold">How to Cure</h2>
-            </div>
-            <ul className="list-disc pl-6 space-y-1 text-sm">
-              {advice.cure.map((c, i) => <li key={i}>{c}</li>)}
-            </ul>
-          </section>
-
-          <section>
-            <div className="flex items-center gap-2 mb-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              <h2 className="font-bold">Prevention</h2>
-            </div>
-            <ul className="list-disc pl-6 space-y-1 text-sm">
-              {advice.prevention.map((c, i) => <li key={i}>{c}</li>)}
-            </ul>
-          </section>
+          {/* Bottom quick-jump back to cure */}
+          {adviceTab !== "cure" && (
+            <Button
+              onClick={() => setAdviceTab("cure")}
+              className="w-full h-12 rounded-xl font-bold gap-2"
+            >
+              <Stethoscope className="h-4 w-4" /> Show How to Cure
+            </Button>
+          )}
         </div>
       )}
 
