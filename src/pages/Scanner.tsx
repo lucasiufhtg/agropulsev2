@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BackButton } from "@/components/BackButton";
 import { useLang } from "@/context/LanguageContext";
-import { Camera, Send, Loader2 } from "lucide-react";
+import { Camera, Send, Loader2, Leaf, ShieldCheck, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
+import * as tmImage from "@teachablemachine/image";
+import { getAdvice, type DiseaseAdvice } from "@/data/diseaseAdvice";
 
 const TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/XKvjWSTo8/";
 
@@ -12,10 +14,30 @@ const Scanner = () => {
   const { t } = useLang();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const modelRef = useRef<tmImage.CustomMobileNet | null>(null);
   const [active, setActive] = useState(false);
   const [predicting, setPredicting] = useState(false);
+  const [modelLoading, setModelLoading] = useState(false);
   const [result, setResult] = useState<string>("—");
+  const [topLabel, setTopLabel] = useState<string>("");
+  const [advice, setAdvice] = useState<DiseaseAdvice | null>(null);
+  const [showAdvice, setShowAdvice] = useState(false);
   const [feedback, setFeedback] = useState("");
+
+  const loadModel = async () => {
+    if (modelRef.current) return modelRef.current;
+    setModelLoading(true);
+    try {
+      const model = await tmImage.load(
+        TM_MODEL_URL + "model.json",
+        TM_MODEL_URL + "metadata.json"
+      );
+      modelRef.current = model;
+      return model;
+    } finally {
+      setModelLoading(false);
+    }
+  };
 
   const startCamera = async () => {
     try {
@@ -42,20 +64,40 @@ const Scanner = () => {
   useEffect(() => () => stopCamera(), []);
 
   const predict = async () => {
-    if (!active) await startCamera();
-    setPredicting(true);
-    // Simulated prediction (real TM integration would load TF model from TM_MODEL_URL)
-    setTimeout(() => {
-      const samples = [
-        "Healthy Leaf (92%)",
-        "Leaf Blight (78%)",
-        "Powdery Mildew (84%)",
-        "Rust Disease (71%)",
-      ];
-      setResult(samples[Math.floor(Math.random() * samples.length)]);
-      setPredicting(false);
+    try {
+      if (!active) await startCamera();
+      setPredicting(true);
+      const model = await loadModel();
+      if (!videoRef.current) return;
+      const predictions = await model.predict(videoRef.current);
+      predictions.sort((a, b) => b.probability - a.probability);
+      const top = predictions[0];
+      const pct = (top.probability * 100).toFixed(1);
+      setTopLabel(top.className);
+      setResult(`${top.className} (${pct}%)`);
+      setShowAdvice(false);
+      setAdvice(null);
       toast.success("Prediction complete");
-    }, 1400);
+    } catch (err) {
+      console.error(err);
+      toast.error("Prediction failed");
+    } finally {
+      setPredicting(false);
+    }
+  };
+
+  const showPlantAdvice = () => {
+    if (!topLabel) {
+      toast.error("Please run Predict first");
+      return;
+    }
+    const a = getAdvice(topLabel);
+    if (!a) {
+      toast.error("No advice available for this result");
+      return;
+    }
+    setAdvice(a);
+    setShowAdvice(true);
   };
 
   const submitFeedback = () => {
@@ -92,9 +134,10 @@ const Scanner = () => {
             <p>Camera preview</p>
           </div>
         )}
-        {predicting && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <Loader2 className="h-12 w-12 text-white animate-spin" />
+        {(predicting || modelLoading) && (
+          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 text-white">
+            <Loader2 className="h-12 w-12 animate-spin" />
+            <p className="text-sm">{modelLoading ? "Loading model..." : "Analyzing..."}</p>
           </div>
         )}
       </div>
@@ -102,19 +145,56 @@ const Scanner = () => {
       <div className="grid grid-cols-2 gap-3">
         <Button
           onClick={predict}
+          disabled={predicting || modelLoading}
           className="h-14 text-lg font-bold rounded-2xl"
           style={{ background: "var(--gradient-primary)" }}
         >
           {t("predict")}
         </Button>
         <Button
-          onClick={() => window.open(TM_MODEL_URL, "_blank")}
+          onClick={showPlantAdvice}
           variant="secondary"
           className="h-14 text-lg font-bold rounded-2xl"
         >
           {t("scanPlant")}
         </Button>
       </div>
+
+      {showAdvice && advice && (
+        <div className="bg-card rounded-2xl p-4 shadow-sm space-y-4">
+          <p className="text-lg font-extrabold text-primary">{topLabel}</p>
+
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <Leaf className="h-5 w-5 text-primary" />
+              <h2 className="font-bold">Cause</h2>
+            </div>
+            <ul className="list-disc pl-6 space-y-1 text-sm">
+              {advice.cause.map((c, i) => <li key={i}>{c}</li>)}
+            </ul>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <Stethoscope className="h-5 w-5 text-primary" />
+              <h2 className="font-bold">How to Cure</h2>
+            </div>
+            <ul className="list-disc pl-6 space-y-1 text-sm">
+              {advice.cure.map((c, i) => <li key={i}>{c}</li>)}
+            </ul>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <h2 className="font-bold">Prevention</h2>
+            </div>
+            <ul className="list-disc pl-6 space-y-1 text-sm">
+              {advice.prevention.map((c, i) => <li key={i}>{c}</li>)}
+            </ul>
+          </section>
+        </div>
+      )}
 
       <div className="bg-card rounded-2xl p-4 shadow-sm">
         <p className="font-bold mb-2">{t("feedback")}</p>
