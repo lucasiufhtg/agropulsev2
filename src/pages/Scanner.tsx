@@ -320,77 +320,75 @@ const Scanner = () => {
           </div>
         </header>
 
-        {/* Step 1: Snap photo */}
+        {/* Step 1: Verdict */}
         <div className="space-y-2">
-          <p className="text-sm font-bold">1. Photo of leaf</p>
-          <div className="flex gap-3 items-center">
-            <button
-              onClick={snapPhoto}
-              className="relative h-24 w-24 shrink-0 rounded-2xl border-2 border-dashed border-primary/40 bg-muted/30 flex items-center justify-center overflow-hidden hover:bg-muted/50 transition"
-              type="button"
-            >
-              {snapDataUrl ? (
-                <img
-                  src={snapDataUrl}
-                  alt="Snapped leaf"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <ImageIcon className="h-8 w-8 text-primary/60" />
-              )}
-            </button>
-            <Button
-              onClick={snapPhoto}
-              className="flex-1 h-14 rounded-2xl text-base font-bold gap-2"
-              variant="secondary"
-            >
-              <Camera className="h-5 w-5" />
-              {snapDataUrl ? "Retake Photo" : "Snap Photo of Leaf"}
-            </Button>
-          </div>
-        </div>
-
-        {/* Step 2: Verdict */}
-        <div className="space-y-2">
-          <p className="text-sm font-bold">2. Was the prediction correct?</p>
+          <p className="text-sm font-bold">Is it wrong?</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setVerdict("True")}
               type="button"
-              className={`h-16 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition ${
+              aria-label="Thumbs up"
+              className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
                 verdict === "True"
                   ? "bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]"
                   : "bg-background border-border hover:border-primary/50"
               }`}
             >
-              <ThumbsUp className="h-6 w-6" />
-              Correct
+              <ThumbsUp className="h-7 w-7" />
             </button>
             <button
               onClick={() => setVerdict("False")}
               type="button"
-              className={`h-16 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition ${
+              aria-label="Thumbs down"
+              className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
                 verdict === "False"
                   ? "bg-destructive text-destructive-foreground border-destructive shadow-md scale-[1.02]"
                   : "bg-background border-border hover:border-destructive/50"
               }`}
             >
-              <ThumbsDown className="h-6 w-6" />
-              Wrong
+              <ThumbsDown className="h-7 w-7" />
             </button>
           </div>
         </div>
 
-        {/* Step 3: Notes */}
-        <div className="space-y-2">
-          <p className="text-sm font-bold">3. Additional Notes</p>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="e.g. Yellow spots on lower leaves..."
-            className="rounded-2xl min-h-24 text-base"
-          />
-        </div>
+        {verdict && (
+          <>
+            {/* Snap photo */}
+            <div className="flex gap-3 items-center">
+              <button
+                onClick={snapPhoto}
+                className="relative h-20 w-20 shrink-0 rounded-2xl border-2 border-dashed border-primary/40 bg-muted/30 flex items-center justify-center overflow-hidden hover:bg-muted/50 transition"
+                type="button"
+              >
+                {snapDataUrl ? (
+                  <img
+                    src={snapDataUrl}
+                    alt="Snapped leaf"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <ImageIcon className="h-7 w-7 text-primary/60" />
+                )}
+              </button>
+              <Button
+                onClick={snapPhoto}
+                className="flex-1 h-14 rounded-2xl text-base font-bold gap-2"
+                variant="secondary"
+              >
+                <Camera className="h-5 w-5" />
+                {snapDataUrl ? "Retake" : "Snap Photo"}
+              </Button>
+            </div>
+
+            {/* Notes */}
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Additional notes..."
+              className="rounded-2xl min-h-24 text-base"
+            />
+          </>
+        )}
 
         {/* Submit */}
         <Button
@@ -405,7 +403,7 @@ const Scanner = () => {
             </>
           ) : (
             <>
-              <CloudUpload className="h-5 w-5" /> SEND TO CLOUD
+              <CloudUpload className="h-5 w-5" /> SEND
             </>
           )}
         </Button>
