@@ -319,7 +319,7 @@ const Scanner = () => {
           <p className="text-sm font-bold">Is it wrong?</p>
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => { setVerdict("True"); sendToCloud("True"); }}
+              onClick={() => { setVerdict("True"); sendToCloud("True", { silent: true }); }}
               type="button"
               aria-label="Thumbs up"
               className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
