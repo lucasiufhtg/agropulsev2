@@ -384,7 +384,7 @@ const Scanner = () => {
 
             {/* Submit (only after thumb clicked) */}
             <Button
-              onClick={() => sendToCloud()}
+              onClick={() => sendToCloud(undefined, { reset: true })}
               disabled={sending}
               className="w-full h-16 rounded-2xl text-lg font-extrabold gap-2 shadow-lg"
               style={{ background: "var(--gradient-primary)" }}
