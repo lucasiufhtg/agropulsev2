@@ -160,12 +160,20 @@ const Scanner = () => {
     }
   };
 
-  const sendToCloud = async (verdictOverride?: "True" | "False") => {
+  const sendToCloud = async (
+    verdictOverride?: "True" | "False",
+    opts: { silent?: boolean; reset?: boolean } = {}
+  ) => {
     const finalVerdict = verdictOverride ?? verdict;
-    if (!finalVerdict) return toast.error("Tap 👍 or 👎 first");
+    if (!finalVerdict) {
+      if (!opts.silent) toast.error("Tap 👍 or 👎 first");
+      return;
+    }
 
-    setSending(true);
-    setSentOk(false);
+    if (!opts.silent) {
+      setSending(true);
+      setSentOk(false);
+    }
     try {
       const base64 = snapDataUrl ? (snapDataUrl.split(",")[1] ?? "") : "";
       const filename = `${formatTimestamp(new Date())}_img.jpg`;
@@ -178,23 +186,26 @@ const Scanner = () => {
         feedback: notes,
       };
 
-      // Apps Script Web Apps require no custom headers to avoid CORS preflight
       await fetch(CLOUD_UPLOAD_URL, {
         method: "POST",
         mode: "no-cors",
         body: JSON.stringify(payload),
       });
 
-      setSentOk(true);
-      toast.success("Success! Report saved to Google Drive.");
-      setNotes("");
-      setVerdict(null);
-      setSnapDataUrl(null);
+      if (!opts.silent) {
+        setSentOk(true);
+        toast.success("Success! Report saved to Google Drive.");
+      }
+      if (opts.reset) {
+        setNotes("");
+        setVerdict(null);
+        setSnapDataUrl(null);
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Upload failed. Please try again.");
+      if (!opts.silent) toast.error("Upload failed. Please try again.");
     } finally {
-      setSending(false);
+      if (!opts.silent) setSending(false);
     }
   };
 
@@ -308,7 +319,7 @@ const Scanner = () => {
           <p className="text-sm font-bold">Is it wrong?</p>
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => { setVerdict("True"); sendToCloud("True"); }}
+              onClick={() => { setVerdict("True"); sendToCloud("True", { silent: true }); }}
               type="button"
               aria-label="Thumbs up"
               className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
@@ -320,7 +331,7 @@ const Scanner = () => {
               <ThumbsUp className="h-7 w-7" />
             </button>
             <button
-              onClick={() => { setVerdict("False"); sendToCloud("False"); }}
+              onClick={() => { setVerdict("False"); sendToCloud("False", { silent: true }); }}
               type="button"
               aria-label="Thumbs down"
               className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
@@ -373,7 +384,7 @@ const Scanner = () => {
 
             {/* Submit (only after thumb clicked) */}
             <Button
-              onClick={() => sendToCloud()}
+              onClick={() => sendToCloud(undefined, { reset: true })}
               disabled={sending}
               className="w-full h-16 rounded-2xl text-lg font-extrabold gap-2 shadow-lg"
               style={{ background: "var(--gradient-primary)" }}
