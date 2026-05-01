@@ -167,14 +167,14 @@ const Scanner = () => {
     setSending(true);
     setSentOk(false);
     try {
-      const base64 = snapDataUrl.split(",")[1] ?? "";
+      const base64 = snapDataUrl ? (snapDataUrl.split(",")[1] ?? "") : "";
       const filename = `${formatTimestamp(new Date())}_img.jpg`;
       const payload = {
         filename,
         folderid: DRIVE_FOLDER_ID,
         mimetype: "image/jpeg",
         data: base64,
-        prediction: verdict,
+        prediction: finalVerdict,
         feedback: notes,
       };
 
