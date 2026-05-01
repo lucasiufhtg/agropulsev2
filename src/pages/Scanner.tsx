@@ -303,29 +303,12 @@ const Scanner = () => {
 
       {/* ============ CLOUD FEEDBACK CARD ============ */}
       <section className="bg-card rounded-3xl p-5 shadow-md border border-border/60 space-y-5">
-        <header className="flex items-center gap-3">
-          <div
-            className="h-11 w-11 rounded-2xl flex items-center justify-center text-white"
-            style={{ background: "var(--gradient-primary)" }}
-          >
-            <CloudUpload className="h-6 w-6" />
-          </div>
-          <div>
-            <h2 className="font-extrabold text-lg leading-tight text-primary">
-              Report to Cloud
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Help us improve — send a photo + your feedback
-            </p>
-          </div>
-        </header>
-
-        {/* Step 1: Verdict */}
+        {/* Verdict */}
         <div className="space-y-2">
           <p className="text-sm font-bold">Is it wrong?</p>
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => setVerdict("True")}
+              onClick={() => { setVerdict("True"); sendToCloud("True"); }}
               type="button"
               aria-label="Thumbs up"
               className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
@@ -337,7 +320,7 @@ const Scanner = () => {
               <ThumbsUp className="h-7 w-7" />
             </button>
             <button
-              onClick={() => setVerdict("False")}
+              onClick={() => { setVerdict("False"); sendToCloud("False"); }}
               type="button"
               aria-label="Thumbs down"
               className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
@@ -387,26 +370,26 @@ const Scanner = () => {
               placeholder="Additional notes..."
               className="rounded-2xl min-h-24 text-base"
             />
+
+            {/* Submit (only after thumb clicked) */}
+            <Button
+              onClick={() => sendToCloud()}
+              disabled={sending}
+              className="w-full h-16 rounded-2xl text-lg font-extrabold gap-2 shadow-lg"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              {sending ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" /> Sending...
+                </>
+              ) : (
+                <>
+                  <CloudUpload className="h-5 w-5" /> SEND
+                </>
+              )}
+            </Button>
           </>
         )}
-
-        {/* Submit */}
-        <Button
-          onClick={sendToCloud}
-          disabled={sending}
-          className="w-full h-16 rounded-2xl text-lg font-extrabold gap-2 shadow-lg"
-          style={{ background: "var(--gradient-primary)" }}
-        >
-          {sending ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" /> Sending...
-            </>
-          ) : (
-            <>
-              <CloudUpload className="h-5 w-5" /> SEND
-            </>
-          )}
-        </Button>
 
         {sentOk && (
           <div className="flex items-center gap-2 rounded-2xl bg-primary/10 text-primary px-4 py-3 font-semibold">
