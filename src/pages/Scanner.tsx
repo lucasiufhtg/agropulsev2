@@ -3,12 +3,36 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BackButton } from "@/components/BackButton";
 import { useLang } from "@/context/LanguageContext";
-import { Camera, Send, Loader2, Leaf, ShieldCheck, Stethoscope } from "lucide-react";
+import {
+  Camera,
+  Send,
+  Loader2,
+  Leaf,
+  ShieldCheck,
+  Stethoscope,
+  ThumbsUp,
+  ThumbsDown,
+  CloudUpload,
+  CheckCircle2,
+  ImageIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import * as tmImage from "@teachablemachine/image";
 import { getAdvice, type DiseaseAdvice } from "@/data/diseaseAdvice";
 
 const TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/XKvjWSTo8/";
+
+// TODO: Replace with full Google Apps Script Web App URL
+const CLOUD_UPLOAD_URL =
+  "https://script.google.com/macros/s/AKfycbxWcfF_u_vD3G_X8P3X9X_X";
+const DRIVE_FOLDER_ID = "1eJff5Le_llSL8hCBpjkzv50HaIAecsojJ";
+
+const formatTimestamp = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
 
 const Scanner = () => {
   const { t } = useLang();
@@ -23,7 +47,13 @@ const Scanner = () => {
   const [advice, setAdvice] = useState<DiseaseAdvice | null>(null);
   const [showAdvice, setShowAdvice] = useState(false);
   const [adviceTab, setAdviceTab] = useState<"cure" | "cause" | "prevention">("cure");
-  const [feedback, setFeedback] = useState("");
+
+  // Cloud feedback state
+  const [snapDataUrl, setSnapDataUrl] = useState<string | null>(null);
+  const [verdict, setVerdict] = useState<"True" | "False" | null>(null);
+  const [notes, setNotes] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sentOk, setSentOk] = useState(false);
 
   const loadModel = async () => {
     if (modelRef.current) return modelRef.current;
@@ -108,10 +138,64 @@ const Scanner = () => {
     prevention: { title: "Prevention", icon: ShieldCheck, items: advice?.prevention ?? [] },
   } as const;
 
-  const submitFeedback = () => {
-    if (!feedback.trim()) return toast.error("Please write feedback first");
-    toast.success("Thanks for your feedback!");
-    setFeedback("");
+  // ===== Cloud feedback handlers =====
+  const snapPhoto = async () => {
+    try {
+      if (!active) await startCamera();
+      if (!videoRef.current) return;
+      const v = videoRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = v.videoWidth || 640;
+      canvas.height = v.videoHeight || 640;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      setSnapDataUrl(dataUrl);
+      setSentOk(false);
+      toast.success("Photo captured");
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not snap photo");
+    }
+  };
+
+  const sendToCloud = async () => {
+    if (!snapDataUrl) return toast.error("Please snap a photo first");
+    if (!verdict) return toast.error("Tap 👍 or 👎 first");
+
+    setSending(true);
+    setSentOk(false);
+    try {
+      const base64 = snapDataUrl.split(",")[1] ?? "";
+      const filename = `${formatTimestamp(new Date())}_img.jpg`;
+      const payload = {
+        filename,
+        folderid: DRIVE_FOLDER_ID,
+        mimetype: "image/jpeg",
+        data: base64,
+        prediction: verdict,
+        feedback: notes,
+      };
+
+      // Apps Script Web Apps require no custom headers to avoid CORS preflight
+      await fetch(CLOUD_UPLOAD_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload),
+      });
+
+      setSentOk(true);
+      toast.success("Success! Report saved to Google Drive.");
+      setNotes("");
+      setVerdict(null);
+      setSnapDataUrl(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -172,7 +256,6 @@ const Scanner = () => {
         <div className="bg-card rounded-2xl p-4 shadow-sm space-y-4">
           <p className="text-lg font-extrabold text-primary">{topLabel}</p>
 
-          {/* Top toggle buttons */}
           <div className="grid grid-cols-2 gap-2">
             <Button
               onClick={() => setAdviceTab("cause")}
@@ -190,7 +273,6 @@ const Scanner = () => {
             </Button>
           </div>
 
-          {/* Active section */}
           <section className="bg-muted/40 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               {(() => {
@@ -208,7 +290,6 @@ const Scanner = () => {
             </ul>
           </section>
 
-          {/* Bottom quick-jump back to cure */}
           {adviceTab !== "cure" && (
             <Button
               onClick={() => setAdviceTab("cure")}
@@ -220,18 +301,122 @@ const Scanner = () => {
         </div>
       )}
 
-      <div className="bg-card rounded-2xl p-4 shadow-sm">
-        <p className="font-bold mb-2">{t("feedback")}</p>
-        <Textarea
-          value={feedback}
-          onChange={(e) => setFeedback(e.target.value)}
-          placeholder="Your thoughts..."
-          className="rounded-xl min-h-20"
-        />
-        <Button onClick={submitFeedback} className="mt-3 w-full h-12 rounded-xl gap-2">
-          <Send className="h-4 w-4" /> {t("submit")}
+      {/* ============ CLOUD FEEDBACK CARD ============ */}
+      <section className="bg-card rounded-3xl p-5 shadow-md border border-border/60 space-y-5">
+        <header className="flex items-center gap-3">
+          <div
+            className="h-11 w-11 rounded-2xl flex items-center justify-center text-white"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            <CloudUpload className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-extrabold text-lg leading-tight text-primary">
+              Report to Cloud
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Help us improve — send a photo + your feedback
+            </p>
+          </div>
+        </header>
+
+        {/* Step 1: Snap photo */}
+        <div className="space-y-2">
+          <p className="text-sm font-bold">1. Photo of leaf</p>
+          <div className="flex gap-3 items-center">
+            <button
+              onClick={snapPhoto}
+              className="relative h-24 w-24 shrink-0 rounded-2xl border-2 border-dashed border-primary/40 bg-muted/30 flex items-center justify-center overflow-hidden hover:bg-muted/50 transition"
+              type="button"
+            >
+              {snapDataUrl ? (
+                <img
+                  src={snapDataUrl}
+                  alt="Snapped leaf"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <ImageIcon className="h-8 w-8 text-primary/60" />
+              )}
+            </button>
+            <Button
+              onClick={snapPhoto}
+              className="flex-1 h-14 rounded-2xl text-base font-bold gap-2"
+              variant="secondary"
+            >
+              <Camera className="h-5 w-5" />
+              {snapDataUrl ? "Retake Photo" : "Snap Photo of Leaf"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Step 2: Verdict */}
+        <div className="space-y-2">
+          <p className="text-sm font-bold">2. Was the prediction correct?</p>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setVerdict("True")}
+              type="button"
+              className={`h-16 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition ${
+                verdict === "True"
+                  ? "bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]"
+                  : "bg-background border-border hover:border-primary/50"
+              }`}
+            >
+              <ThumbsUp className="h-6 w-6" />
+              Correct
+            </button>
+            <button
+              onClick={() => setVerdict("False")}
+              type="button"
+              className={`h-16 rounded-2xl font-bold flex items-center justify-center gap-2 border-2 transition ${
+                verdict === "False"
+                  ? "bg-destructive text-destructive-foreground border-destructive shadow-md scale-[1.02]"
+                  : "bg-background border-border hover:border-destructive/50"
+              }`}
+            >
+              <ThumbsDown className="h-6 w-6" />
+              Wrong
+            </button>
+          </div>
+        </div>
+
+        {/* Step 3: Notes */}
+        <div className="space-y-2">
+          <p className="text-sm font-bold">3. Additional Notes</p>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="e.g. Yellow spots on lower leaves..."
+            className="rounded-2xl min-h-24 text-base"
+          />
+        </div>
+
+        {/* Submit */}
+        <Button
+          onClick={sendToCloud}
+          disabled={sending}
+          className="w-full h-16 rounded-2xl text-lg font-extrabold gap-2 shadow-lg"
+          style={{ background: "var(--gradient-primary)" }}
+        >
+          {sending ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" /> Sending...
+            </>
+          ) : (
+            <>
+              <CloudUpload className="h-5 w-5" /> SEND TO CLOUD
+            </>
+          )}
         </Button>
-      </div>
+
+        {sentOk && (
+          <div className="flex items-center gap-2 rounded-2xl bg-primary/10 text-primary px-4 py-3 font-semibold">
+            <CheckCircle2 className="h-5 w-5" />
+            Success! Report saved to Google Drive.
+          </div>
+        )}
+      </section>
 
       <Button
         asChild
