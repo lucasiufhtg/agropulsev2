@@ -331,7 +331,7 @@ const Scanner = () => {
               <ThumbsUp className="h-7 w-7" />
             </button>
             <button
-              onClick={() => { setVerdict("False"); sendToCloud("False"); }}
+              onClick={() => { setVerdict("False"); sendToCloud("False", { silent: true }); }}
               type="button"
               aria-label="Thumbs down"
               className={`h-16 rounded-2xl flex items-center justify-center border-2 transition ${
