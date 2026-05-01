@@ -160,9 +160,9 @@ const Scanner = () => {
     }
   };
 
-  const sendToCloud = async () => {
-    if (!snapDataUrl) return toast.error("Please snap a photo first");
-    if (!verdict) return toast.error("Tap 👍 or 👎 first");
+  const sendToCloud = async (verdictOverride?: "True" | "False") => {
+    const finalVerdict = verdictOverride ?? verdict;
+    if (!finalVerdict) return toast.error("Tap 👍 or 👎 first");
 
     setSending(true);
     setSentOk(false);
