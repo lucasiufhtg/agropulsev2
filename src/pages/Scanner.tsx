@@ -366,7 +366,7 @@ const Scanner = () => {
       <section className="bg-card rounded-3xl p-5 shadow-md border border-border/60 space-y-5">
         {/* Verdict */}
         <div className="space-y-2">
-          <p className="text-sm font-bold">Is it wrong?</p>
+          <p className="text-sm font-bold">Think its wrong?</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => { setVerdict("True"); sendToCloud("True", { silent: true }); }}
