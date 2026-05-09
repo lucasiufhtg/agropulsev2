@@ -15,6 +15,8 @@ import {
   CloudUpload,
   CheckCircle2,
   ImageIcon,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as tmImage from "@teachablemachine/image";
