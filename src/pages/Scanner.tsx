@@ -15,6 +15,8 @@ import {
   CloudUpload,
   CheckCircle2,
   ImageIcon,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as tmImage from "@teachablemachine/image";
@@ -54,6 +56,30 @@ const Scanner = () => {
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [sentOk, setSentOk] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+
+  const stopSpeak = () => {
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    setSpeaking(false);
+  };
+
+  const speakText = (text: string) => {
+    if (!("speechSynthesis" in window)) {
+      toast.error("Text-to-speech not supported on this device");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    if (!text.trim()) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    u.pitch = 1;
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+    window.speechSynthesis.speak(u);
+  };
+
+  useEffect(() => () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); }, []);
 
   const loadModel = async () => {
     if (modelRef.current) return modelRef.current;
@@ -299,9 +325,24 @@ const Scanner = () => {
                 const Icon = tabConfig[adviceTab].icon;
                 return <Icon className="h-6 w-6 text-primary" />;
               })()}
-              <h2 className="font-extrabold text-lg text-primary">
+              <h2 className="font-extrabold text-lg text-primary flex-1">
                 {tabConfig[adviceTab].title}
               </h2>
+              <button
+                type="button"
+                onClick={() =>
+                  speaking
+                    ? stopSpeak()
+                    : speakText(
+                        `${tabConfig[adviceTab].title} for ${topLabel}. ` +
+                          tabConfig[adviceTab].items.join(". ")
+                      )
+                }
+                aria-label={speaking ? "Stop reading" : "Read aloud"}
+                className="h-10 w-10 rounded-full flex items-center justify-center bg-primary text-primary-foreground hover:opacity-90 transition shadow"
+              >
+                {speaking ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+              </button>
             </div>
             <ul className="list-disc pl-6 space-y-2 text-base">
               {tabConfig[adviceTab].items.map((c, i) => (
