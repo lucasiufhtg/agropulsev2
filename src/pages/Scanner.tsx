@@ -72,9 +72,18 @@ const Scanner = () => {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
+      let stream: MediaStream;
+      try {
+        // Prefer the rear/back camera on phones
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: "environment" } },
+        });
+      } catch {
+        // Fallback for desktops/laptops without a rear camera
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+      }
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
