@@ -56,6 +56,30 @@ const Scanner = () => {
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [sentOk, setSentOk] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+
+  const stopSpeak = () => {
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    setSpeaking(false);
+  };
+
+  const speakText = (text: string) => {
+    if (!("speechSynthesis" in window)) {
+      toast.error("Text-to-speech not supported on this device");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    if (!text.trim()) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    u.pitch = 1;
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+    window.speechSynthesis.speak(u);
+  };
+
+  useEffect(() => () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); }, []);
 
   const loadModel = async () => {
     if (modelRef.current) return modelRef.current;
