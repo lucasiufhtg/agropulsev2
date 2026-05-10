@@ -21,8 +21,28 @@ import {
 import { toast } from "sonner";
 import * as tmImage from "@teachablemachine/image";
 import { getAdvice, type DiseaseAdvice } from "@/data/diseaseAdvice";
+import leafcurl1 from "@/assets/leafcurl-1.png";
+import leafcurl2 from "@/assets/leafcurl-2.png";
+import leafcurl3 from "@/assets/leafcurl-3.png";
+import cercospora1 from "@/assets/cercospora-1.png";
+import cercospora2 from "@/assets/cercospora-2.png";
+import cercospora3 from "@/assets/cercospora-3.png";
+import bacterial1 from "@/assets/bacterial-1.png";
+import bacterial2 from "@/assets/bacterial-2.png";
+import bacterial3 from "@/assets/bacterial-3.png";
 
-const TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/XKvjWSTo8/";
+const referenceImages: { match: string; title: string; images: string[] }[] = [
+  { match: "leaf curl", title: "Chili Leaf Curl reference", images: [leafcurl1, leafcurl2, leafcurl3] },
+  { match: "cercospora", title: "Chili Cercospora Leaf Spot reference", images: [cercospora1, cercospora2, cercospora3] },
+  { match: "bacterial", title: "Chili Bacterial Spot reference", images: [bacterial1, bacterial2, bacterial3] },
+];
+
+const getReferenceFor = (label: string) => {
+  const l = label.toLowerCase();
+  return referenceImages.find((r) => l.includes(r.match)) ?? null;
+};
+
+const TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/L09cVyhzS/";
 
 // TODO: Replace with full Google Apps Script Web App URL
 const CLOUD_UPLOAD_URL =
@@ -401,6 +421,25 @@ const Scanner = () => {
 
         {verdict && (
           <>
+            {(() => {
+              const ref = getReferenceFor(topLabel);
+              if (!ref) return null;
+              return (
+                <div className="space-y-2">
+                  <p className="text-sm font-bold text-primary">{ref.title}</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {ref.images.map((src, i) => (
+                      <img
+                        key={i}
+                        src={src}
+                        alt={`${ref.title} ${i + 1}`}
+                        className="w-full rounded-2xl object-cover border border-border"
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
             {/* Snap photo */}
             <div className="flex gap-3 items-center">
               <button
