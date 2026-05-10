@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useLang } from "@/context/LanguageContext";
 import iconCrop from "@/assets/icon-crop.png";
 import iconAi from "@/assets/icon-ai.png";
-import iconLight from "@/assets/icon-light.png";
 import iconWeather from "@/assets/icon-weather.png";
 
 const Menu = () => {
