@@ -11,7 +11,6 @@ const Menu = () => {
   const tiles = [
     { key: "scanner", img: iconCrop, label: t("scanner"), to: "/scanner" },
     { key: "chatbot", img: iconAi, label: t("chatbot"), to: "/chatbot" },
-    { key: "light", img: iconLight, label: t("light"), to: "/light" },
     { key: "weather", img: iconWeather, label: t("weather"), to: "/weather" },
   ];
 
