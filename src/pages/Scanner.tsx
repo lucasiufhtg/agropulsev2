@@ -435,13 +435,13 @@ const Scanner = () => {
               return (
                 <div className="space-y-2">
                   <p className="text-sm font-bold text-primary">{ref.title}</p>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-3 gap-2">
                     {ref.images.map((src, i) => (
                       <img
                         key={i}
                         src={src}
                         alt={`${ref.title} ${i + 1}`}
-                        className="w-full rounded-2xl object-cover border border-border"
+                        className="w-full aspect-square rounded-xl object-cover border border-border"
                       />
                     ))}
                   </div>
