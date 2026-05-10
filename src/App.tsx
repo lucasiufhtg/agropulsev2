@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/menu" element={<Menu />} />
             <Route path="/scanner" element={<Scanner />} />
             <Route path="/chatbot" element={<Chatbot />} />
-            <Route path="/light" element={<LightSensor />} />
+            
             <Route path="/weather" element={<Weather />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
