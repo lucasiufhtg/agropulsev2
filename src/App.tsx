@@ -9,7 +9,7 @@ import LanguageSelect from "./pages/LanguageSelect";
 import Menu from "./pages/Menu";
 import Scanner from "./pages/Scanner";
 import Chatbot from "./pages/Chatbot";
-import LightSensor from "./pages/LightSensor";
+
 import Weather from "./pages/Weather";
 import NotFound from "./pages/NotFound";
 
