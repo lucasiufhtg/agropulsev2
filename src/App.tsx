@@ -9,7 +9,7 @@ import LanguageSelect from "./pages/LanguageSelect";
 import Menu from "./pages/Menu";
 import Scanner from "./pages/Scanner";
 import Chatbot from "./pages/Chatbot";
-import LightSensor from "./pages/LightSensor";
+
 import Weather from "./pages/Weather";
 import NotFound from "./pages/NotFound";
 
@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/menu" element={<Menu />} />
             <Route path="/scanner" element={<Scanner />} />
             <Route path="/chatbot" element={<Chatbot />} />
-            <Route path="/light" element={<LightSensor />} />
+            
             <Route path="/weather" element={<Weather />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
