@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import * as tmImage from "@teachablemachine/image";
 import { getAdvice, type DiseaseAdvice } from "@/data/diseaseAdvice";
 
-const TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/XKvjWSTo8/";
+const TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/L09cVyhzS/";
 
 // TODO: Replace with full Google Apps Script Web App URL
 const CLOUD_UPLOAD_URL =
