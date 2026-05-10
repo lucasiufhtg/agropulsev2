@@ -30,11 +30,19 @@ import cercospora3 from "@/assets/cercospora-3.png";
 import bacterial1 from "@/assets/bacterial-1.png";
 import bacterial2 from "@/assets/bacterial-2.png";
 import bacterial3 from "@/assets/bacterial-3.png";
+import powdery1 from "@/assets/powdery-1.png";
+import powdery2 from "@/assets/powdery-2.png";
+import powdery3 from "@/assets/powdery-3.png";
+import healthy1 from "@/assets/healthy-1.png";
+import healthy2 from "@/assets/healthy-2.png";
+import healthy3 from "@/assets/healthy-3.png";
 
 const referenceImages: { match: string; title: string; images: string[] }[] = [
   { match: "leaf curl", title: "Chili Leaf Curl reference", images: [leafcurl1, leafcurl2, leafcurl3] },
   { match: "cercospora", title: "Chili Cercospora Leaf Spot reference", images: [cercospora1, cercospora2, cercospora3] },
   { match: "bacterial", title: "Chili Bacterial Spot reference", images: [bacterial1, bacterial2, bacterial3] },
+  { match: "powdery", title: "Chili Powdery Mildew reference", images: [powdery1, powdery2, powdery3] },
+  { match: "healthy", title: "Chili Healthy reference", images: [healthy1, healthy2, healthy3] },
 ];
 
 const getReferenceFor = (label: string) => {
@@ -427,13 +435,13 @@ const Scanner = () => {
               return (
                 <div className="space-y-2">
                   <p className="text-sm font-bold text-primary">{ref.title}</p>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-3 gap-2">
                     {ref.images.map((src, i) => (
                       <img
                         key={i}
                         src={src}
                         alt={`${ref.title} ${i + 1}`}
-                        className="w-full rounded-2xl object-cover border border-border"
+                        className="w-full aspect-square rounded-xl object-cover border border-border"
                       />
                     ))}
                   </div>
