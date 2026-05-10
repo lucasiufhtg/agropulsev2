@@ -21,6 +21,26 @@ import {
 import { toast } from "sonner";
 import * as tmImage from "@teachablemachine/image";
 import { getAdvice, type DiseaseAdvice } from "@/data/diseaseAdvice";
+import leafcurl1 from "@/assets/leafcurl-1.png";
+import leafcurl2 from "@/assets/leafcurl-2.png";
+import leafcurl3 from "@/assets/leafcurl-3.png";
+import cercospora1 from "@/assets/cercospora-1.png";
+import cercospora2 from "@/assets/cercospora-2.png";
+import cercospora3 from "@/assets/cercospora-3.png";
+import bacterial1 from "@/assets/bacterial-1.png";
+import bacterial2 from "@/assets/bacterial-2.png";
+import bacterial3 from "@/assets/bacterial-3.png";
+
+const referenceImages: { match: string; title: string; images: string[] }[] = [
+  { match: "leaf curl", title: "Chili Leaf Curl reference", images: [leafcurl1, leafcurl2, leafcurl3] },
+  { match: "cercospora", title: "Chili Cercospora Leaf Spot reference", images: [cercospora1, cercospora2, cercospora3] },
+  { match: "bacterial", title: "Chili Bacterial Spot reference", images: [bacterial1, bacterial2, bacterial3] },
+];
+
+const getReferenceFor = (label: string) => {
+  const l = label.toLowerCase();
+  return referenceImages.find((r) => l.includes(r.match)) ?? null;
+};
 
 const TM_MODEL_URL = "https://teachablemachine.withgoogle.com/models/L09cVyhzS/";
 
