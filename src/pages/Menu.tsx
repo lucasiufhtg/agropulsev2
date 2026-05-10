@@ -8,12 +8,6 @@ const Menu = () => {
   const navigate = useNavigate();
   const { t } = useLang();
 
-  const tiles = [
-    { key: "scanner", img: iconCrop, label: t("scanner"), to: "/scanner" },
-    { key: "chatbot", img: iconAi, label: t("chatbot"), to: "/chatbot" },
-    { key: "weather", img: iconWeather, label: t("weather"), to: "/weather" },
-  ];
-
   return (
     <main className="min-h-screen px-4 py-6 flex flex-col">
       <header className="text-center mb-6">
@@ -21,26 +15,48 @@ const Menu = () => {
         <p className="text-muted-foreground mt-1 font-semibold">{t("menuTitle")}</p>
       </header>
 
-      <div className="grid grid-cols-2 gap-4 flex-1 max-w-3xl w-full mx-auto">
-        {tiles.map((tile) => (
-          <button
-            key={tile.key}
-            onClick={() => navigate(tile.to)}
-            className="tile-card text-center"
-          >
-            <img
-              src={tile.img}
-              alt={tile.label}
-              width={512}
-              height={512}
-              loading="lazy"
-              className="w-24 h-24 md:w-32 md:h-32 object-contain"
-            />
-            <span className="text-sm md:text-lg font-extrabold text-primary leading-tight">
-              {tile.label}
-            </span>
-          </button>
-        ))}
+      <div className="relative flex-1 max-w-3xl w-full mx-auto flex flex-col gap-4">
+        <button
+          onClick={() => navigate("/scanner")}
+          className="tile-card flex-1 text-center"
+        >
+          <img
+            src={iconCrop}
+            alt={t("scanner")}
+            className="w-40 h-40 md:w-56 md:h-56 object-contain"
+          />
+          <span className="text-xl md:text-3xl font-extrabold text-primary leading-tight">
+            {t("scanner")}
+          </span>
+        </button>
+
+        <button
+          onClick={() => navigate("/weather")}
+          className="tile-card flex-1 text-center"
+        >
+          <img
+            src={iconWeather}
+            alt={t("weather")}
+            className="w-40 h-40 md:w-56 md:h-56 object-contain"
+          />
+          <span className="text-xl md:text-3xl font-extrabold text-primary leading-tight">
+            {t("weather")}
+          </span>
+        </button>
+
+        {/* Floating AI Chatbot circle */}
+        <button
+          onClick={() => navigate("/chatbot")}
+          aria-label={t("chatbot")}
+          className="fixed bottom-6 right-6 z-20 h-20 w-20 rounded-full bg-primary text-primary-foreground shadow-2xl flex flex-col items-center justify-center gap-0.5 active:scale-95 transition border-4 border-background"
+        >
+          <img
+            src={iconAi}
+            alt=""
+            className="w-10 h-10 object-contain"
+          />
+          <span className="text-[10px] font-bold leading-none">AI</span>
+        </button>
       </div>
     </main>
   );
