@@ -359,6 +359,10 @@ const Scanner = () => {
               <Stethoscope className="h-4 w-4" /> Show How to Cure
             </Button>
           )}
+
+          <p className="text-xs text-muted-foreground italic text-center pt-2 border-t border-border/40">
+            All info taken from Jabatan Pertanian Malaysia
+          </p>
         </div>
       )}
 
